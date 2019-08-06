@@ -1,13 +1,169 @@
-# lovelace_gen
+lovelace\_gen
+============
 
-`configuration.yaml`
+Improve the lovelace yaml parser for Home Assistant.
+
+See [my floorplan card](https://github.com/thomasloven/hass-config/blob/master/lovelace/floorplan.yaml) for an example of what's possible.
+
+# Installation instructions
+
+- Copy the contenst of `custom_components/lovelace_gen/` to `<your config dir>/custom_components/lovelace_gen/`.
+- Add the following to your `configuration.yaml`:
+
 ```yaml
 lovelace_gen:
+
+lovelace:
+  mode: yaml
 ```
 
-Regenerate by using the "Refresh" function in lovelace.
+- Restart Home Assistant
+
+# Usage
+
+This integration changes the way Home Assistant parses your `ui_lovelace.yaml` before sending the information off to the lovelace frontend in your browser.
+
+### First of all
+To rerender the frontend, use the Refresh option from the three-dots-menu in Lovelace
 
 ![refresh](https://user-images.githubusercontent.com/1299821/62565489-2e655780-b887-11e9-86a1-2de868a4dc7d.png)
+
+
+### Let's continue
+
+The changes from the default generation include
+
+## Jinja2 templates
+
+You can now use [Jinja2](https://jinja.palletsprojects.com/en/2.10.x/templates/) templates in your lovelace configuration.
+
+This can be used e.g. to
+
+- Set and use variables
+```yaml
+{% set my_lamp = light.bed_light %}
+
+type: entities
+entities:
+ - {{ my_lamp }}
+```
+
+- Loop over lists
+```yaml
+{% set lights = ['light.bed_light', 'light.kitchen_lights', 'light.ceiling_lights' %}
+
+- type: entities
+  entities:
+  {% for l in lights %}
+    - {{ l }}
+  {% endfor %}
+
+- type: horizontal-stack
+  cards:
+    {% for l in lights %}
+    - type: light
+      entity: {{ l }}
+    {% endfor %}
+```
+
+- Use macros
+```yaml
+{% macro button(entity) -%}
+  - type: entity-button
+    entity: {{ entity }}
+    tap_action:
+      action: more-info
+    hold_action:
+      action: toggle
+{%- endmacro %}
+
+type: horizontal-stack
+cards:
+  {{ button(light.bed_light) }}
+  {{ button(light.ceiling_lights) }}
+  {{ button(light.kitchen_lights) }}
+
+```
+Please note that for this to work, the indentation of the code in the macro block *must* be equal to what it should be where it's called.
+
+- Add conditional parts
+```yaml
+{% if myvariable == true %}
+Do something
+{% endif %}
+```
+
+This is NOT dynamic. The values of variables are locked down when you rerender the interface.
+
+This might make conditions seem pointless... but they work well with the next feature.
+
+## Passing arguments to included files
+
+Normally, you can include a file in your lovelace configuration using
+
+```yaml
+view:
+  - !include lovelace/my_view.yaml
+```
+
+`lovelace_gen` lets you add a second argument to that function. This second argument is a dictionary of variables and their values, that will be set for all jinja2 templates in the new file:
+
+```yaml
+type: horizontal-stack
+cards:
+  - !include
+    - button_card.yaml
+    - entity: light.bed_light
+  - !include
+    - button_card.yaml
+    - entity: switch.decorative_lights
+  - !include
+    - button_card.yaml
+    - entity: light.ceiling_lights
+      name: LIGHT!
+```
+
+`button_card.yaml`
+```yaml
+{% if entity.startswith("light") %}
+type: light
+{% else %}
+type: entity-button
+{% endif %}
+entity: {{ entity }}
+name: {{ name }}
+```
+
+![include args](https://user-images.githubusercontent.com/1299821/62578438-6d080b80-b8a1-11e9-892f-f223fa5452c0.png)
+
+
+Be careful about the syntax here. Note that the arguments are given as a list and is indented under the `!include` statement. The second item in the list is a dictionary.
+
+## Invalidate cache of files
+
+If you use lots of custom lovelace cards, chances are that you have run into caching problems at one point or another.
+
+I.e. you refresh your page after updating the custom card, but nothing changes.
+
+The answer is often to add a counter after the URL of your resource, e.g.
+
+```yaml
+resources:
+  - url: /local/card-mod.js?v=2
+    type: module
+```
+
+`lovelace_gen` introduces a `!file` command that handles this for you.
+
+```yaml
+resources:
+  - url: !file /local/card-mod.js
+    type: module
+```
+
+After this, `lovelace_gen` will automatically add a random version number to your URL every time you rerender the frontend. You won't have to worry about cache ever again.
+
+This can also be used for pictures.
 
 ## Example
 `ui_lovelace.yaml`
@@ -36,7 +192,10 @@ cards:
   # Include files with arguments
   # NB: JSON format for arguments
   # And NO SPACE after the colons!
-  - !include floorplan.yaml {"lamps":"true", "title":"With Lamps"}
+  - !include
+    -floorplan.yaml
+    - lamps: true
+      title: With Lamps
 
 # Use this if you want lovelace_gen to ignore the jinja
 {% raw %}
@@ -48,7 +207,9 @@ cards:
       So I can tell that my light is {{ states('light.bed_light') }}!
 {% endraw %}
 
-  - !include floorplan.yaml {"title":"No lights"}
+  - !include
+    - floorplan.yaml
+    - title: No lights
 ```
 
 `lovelace/floorplan.yaml`
@@ -76,3 +237,31 @@ elements:
 
 ![lovelace_gen](https://user-images.githubusercontent.com/1299821/62565373-ecd4ac80-b886-11e9-9dcb-c41b43027b2b.png)
 
+# FAQ
+
+### What if I WANT jinja in my lovelace interface
+Use the `{% raw %}` and `{% endraw %}` tags. There's an example above.
+
+### Is there any way to solve the indentation problem for macros
+Not automatically, but you can do something like
+```yaml
+{% macro button(entity, ws) %}
+{{"  "*ws}}- type: entity-button
+{{"  "*ws}}  entity: {{ entity }}
+{{"  "*ws}}  tap_action:
+{{"  "*ws}}    action: more-info
+{{"  "*ws}}  hold_action:
+{{"  "*ws}}    action: toggle
+{%- endmacro %}
+
+  - type: horizontal-stack
+    cards:
+      {{ button('light.bed_light', 3) }}
+
+  {{ button('light.bed_light', 1) }}
+```
+
+Note that included files don't have this problem.
+
+---
+<a href="https://www.buymeacoffee.com/uqD6KHCdJ" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/white_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>

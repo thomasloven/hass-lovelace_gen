@@ -26,10 +26,12 @@ def load_yaml(fname, args={}):
         raise HomeAssistantError(exc)
 
 def _include_yaml(ldr, node):
-    fn, *args = node.value.split(' ', 1)
+    args = {}
+    if isinstance(node.value, str):
+        fn = node.value
+    else:
+        fn, args, *_ = ldr.construct_sequence(node)
     fname = os.path.join(os.path.dirname(ldr.name), fn)
-    if args:
-        args = json.loads(args[0])
     return loader._add_reference(load_yaml(fname, args), ldr, node)
 
 def _uncache_file(ldr, node):
