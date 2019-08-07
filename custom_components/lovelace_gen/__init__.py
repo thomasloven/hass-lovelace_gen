@@ -54,3 +54,6 @@ def _uncache_file(ldr, node):
 loader.load_yaml = load_yaml
 loader.yaml.SafeLoader.add_constructor("!include", _include_yaml)
 loader.yaml.SafeLoader.add_constructor("!file", _uncache_file)
+
+async def async_setup(*_):
+    return True
