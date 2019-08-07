@@ -28,6 +28,13 @@ To rerender the frontend, use the Refresh option from the three-dots-menu in Lov
 
 ![refresh](https://user-images.githubusercontent.com/1299821/62565489-2e655780-b887-11e9-86a1-2de868a4dc7d.png)
 
+### Second of all
+
+Any yaml file that is to be processed with `lovelace_gen` *MUST* have the following as its first line:
+
+```yaml
+# lovelace_gen
+```
 
 ### Let's continue
 
@@ -125,6 +132,7 @@ cards:
 
 `button_card.yaml`
 ```yaml
+# lovelace_gen
 {% if entity.startswith("light") %}
 type: light
 {% else %}
@@ -168,6 +176,7 @@ This can also be used for pictures.
 ## Example
 `ui_lovelace.yaml`
 ```yaml
+# lovelace_gen
 resources:
   # When you regenerate, the browser cache for this file will be invalidated
   - url: !file /local/card-mod.js
@@ -180,6 +189,7 @@ views:
 
 `lovelace/my_cool_view.yaml`
 ```yaml
+# lovelace_gen
 {% set my_lights = ["light.bed_light", "light.kitchen_lights", "light.ceiling_lights"] %}
 title: My view
 cards:
@@ -214,6 +224,7 @@ cards:
 
 `lovelace/floorplan.yaml`
 ```yaml
+# lovelace_gen
 {% macro lamp(entity, x, y) -%}
 {% if lamps %}
 - type: state-icon

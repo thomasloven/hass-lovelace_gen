@@ -3,6 +3,7 @@ import logging
 import json
 import io
 import time
+from collections import OrderedDict
 
 import jinja2
 
@@ -15,9 +16,18 @@ jinja = jinja2.Environment(loader=jinja2.FileSystemLoader("/"))
 
 def load_yaml(fname, args={}):
     try:
-        stream = io.StringIO(jinja.get_template(fname).render(args))
-        stream.name = fname
-        return loader.yaml.load(stream, Loader=loader.SafeLineLoader) or {}
+        ll_gen = False
+        with open(fname, encoding="utf-8") as f:
+            if f.readline().lower().startswith("# lovelace_gen"):
+                ll_gen = True
+
+        if ll_gen:
+            stream = io.StringIO(jinja.get_template(fname).render(args))
+            stream.name = fname
+            return loader.yaml.load(stream, Loader=loader.SafeLineLoader) or OrderedDict()
+        else:
+            with open(fname, encoding="utf-8") as config_file:
+                return loader.yaml.load(config_file, Loader=loader.SafeLineLoader) or OrderedDict()
     except loader.yaml.YAMLError as exc:
         _LOGGER.error(str(exc))
         raise HomeAssistantError(exc)
