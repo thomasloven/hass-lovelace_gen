@@ -31,7 +31,7 @@ def load_yaml(fname, args={}):
     except loader.yaml.YAMLError as exc:
         _LOGGER.error(str(exc))
         raise HomeAssistantError(exc)
-    except (UnicodeDecodeError, FileNotFoundError) as exc:
+    except UnicodeDecodeError as exc:
         _LOGGER.error("Unable to read file %s: %s", fname, exc)
         raise HomeAssistantError(exc)
 
@@ -43,7 +43,11 @@ def _include_yaml(ldr, node):
     else:
         fn, args, *_ = ldr.construct_sequence(node)
     fname = os.path.join(os.path.dirname(ldr.name), fn)
-    return loader._add_reference(load_yaml(fname, args), ldr, node)
+    try:
+        return loader._add_reference(load_yaml(fname, args), ldr, node)
+    except FileNotFoundError as exc:
+        _LOGGER.error("Unable to include file %s: %s", fname, exc);
+        raise HomeAssistantError(exc)
 
 def _uncache_file(ldr, node):
     path = node.value
