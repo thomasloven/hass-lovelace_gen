@@ -31,9 +31,10 @@ def load_yaml(fname, args={}):
     except loader.yaml.YAMLError as exc:
         _LOGGER.error(str(exc))
         raise HomeAssistantError(exc)
-    except UnicodeDecodeError as exc:
+    except (UnicodeDecodeError, FileNotFoundError) as exc:
         _LOGGER.error("Unable to read file %s: %s", fname, exc)
         raise HomeAssistantError(exc)
+
 
 def _include_yaml(ldr, node):
     args = {}
