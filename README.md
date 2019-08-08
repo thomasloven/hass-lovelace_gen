@@ -1,6 +1,8 @@
 lovelace\_gen
 ============
 
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
+
 Improve the lovelace yaml parser for Home Assistant.
 
 See [my floorplan card](https://github.com/thomasloven/hass-config/blob/master/lovelace/floorplan.yaml) for an example of what's possible.
@@ -21,7 +23,7 @@ lovelace:
 
 # Usage
 
-This integration changes the way Home Assistant parses your `ui_lovelace.yaml` before sending the information off to the lovelace frontend in your browser.
+This integration changes the way Home Assistant parses your `ui_lovelace.yaml` before sending the information off to the lovelace frontend in your browser. It's obviously only useful if you are using [YAML mode](https://www.home-assistant.io/lovelace/yaml-mode/).
 
 ### First of all
 To rerender the frontend, use the Refresh option from the three-dots-menu in Lovelace
