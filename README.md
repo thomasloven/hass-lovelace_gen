@@ -252,6 +252,15 @@ elements:
 
 # FAQ
 
+### Can I use this for my general Home Assistant configuration?
+It's called **lovelace**\_gen for a reason...
+That being said - it *might* work. Or it might not. There's really no way to
+tell. It depends on what parts of the configuration are loaded before or after
+lovelace_gen itself.
+
+I'd advice you not to try it.
+
+
 ### What if I WANT jinja in my lovelace interface
 Use the `{% raw %}` and `{% endraw %}` tags. There's an example above.
 
