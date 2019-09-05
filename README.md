@@ -9,7 +9,7 @@ See [my floorplan card](https://github.com/thomasloven/hass-config/blob/master/l
 
 # Installation instructions
 
-- Copy the contenst of `custom_components/lovelace_gen/` to `<your config dir>/custom_components/lovelace_gen/`.
+- Copy the contents of `custom_components/lovelace_gen/` to `<your config dir>/custom_components/lovelace_gen/`.
 - Add the following to your `configuration.yaml`:
 
 ```yaml
@@ -50,7 +50,7 @@ This can be used e.g. to
 
 - Set and use variables
 ```yaml
-{% set my_lamp = light.bed_light %}
+{% set my_lamp = "light.bed_light" %}
 
 type: entities
 entities:
@@ -88,9 +88,9 @@ entities:
 
 type: horizontal-stack
 cards:
-  {{ button(light.bed_light) }}
-  {{ button(light.ceiling_lights) }}
-  {{ button(light.kitchen_lights) }}
+  {{ button("light.bed_light") }}
+  {{ button("light.ceiling_lights") }}
+  {{ button("light.kitchen_lights") }}
 
 ```
 Please note that for this to work, the indentation of the code in the macro block *must* be equal to what it should be where it's called.
