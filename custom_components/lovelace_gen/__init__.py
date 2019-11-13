@@ -42,7 +42,7 @@ def _include_yaml(ldr, node):
         fn = node.value
     else:
         fn, args, *_ = ldr.construct_sequence(node)
-    fname = os.path.join(os.path.dirname(ldr.name), fn)
+    fname = os.path.abspath(os.path.join(os.path.dirname(ldr.name), fn))
     try:
         return loader._add_reference(load_yaml(fname, args), ldr, node)
     except FileNotFoundError as exc:
