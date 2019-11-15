@@ -14,6 +14,8 @@ _LOGGER = logging.getLogger(__name__)
 
 jinja = jinja2.Environment(loader=jinja2.FileSystemLoader("/"))
 
+llgen_config = {}
+
 def load_yaml(fname, args={}):
     try:
         ll_gen = False
@@ -22,7 +24,7 @@ def load_yaml(fname, args={}):
                 ll_gen = True
 
         if ll_gen:
-            stream = io.StringIO(jinja.get_template(fname).render(args))
+            stream = io.StringIO(jinja.get_template(fname).render({**args, "_global": llgen_config}))
             stream.name = fname
             return loader.yaml.load(stream, Loader=loader.SafeLineLoader) or OrderedDict()
         else:
@@ -60,5 +62,6 @@ loader.load_yaml = load_yaml
 loader.yaml.SafeLoader.add_constructor("!include", _include_yaml)
 loader.yaml.SafeLoader.add_constructor("!file", _uncache_file)
 
-async def async_setup(*_):
+async def async_setup(hass, config):
+    llgen_config.update(config.get("lovelace_gen"));
     return True

@@ -252,6 +252,34 @@ elements:
 
 # FAQ
 
+### How can I do global variables?
+You can add variables to the `lovelace_gen` configuration in `configuration.yaml` and then refernce them in lovelace using `{{ _global }}`.
+
+E.g.:
+```yaml
+lovelace_gen:
+  rooms:
+    - living_room
+    - kitchen
+    - bed_room
+```
+
+```yaml
+type: entities
+entities:
+  {% for room in _global.rooms %}
+  - type: custom:auto-entities
+    card:
+      type: custom:fold-entity-row
+      head:
+        type: section
+        label: {{ room|capitalize }}
+    filter:
+      include:
+        - area: {{ room }}
+  {% endfor %}
+```
+
 ### Can I use this for my general Home Assistant configuration?
 It's called **lovelace**\_gen for a reason...
 That being said - it *might* work. Or it might not. There's really no way to
