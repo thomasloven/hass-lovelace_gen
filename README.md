@@ -250,6 +250,9 @@ elements:
 
 ![lovelace_gen](https://user-images.githubusercontent.com/1299821/62565373-ecd4ac80-b886-11e9-9dcb-c41b43027b2b.png)
 
+## Hidden bonus
+With lovelace_gen installed, you'll be able to redefine node anchors in the same file. A feature in the YAML specification, but an error in the engine Home Assistant normally uses...
+
 # FAQ
 
 ### How can I do global variables?

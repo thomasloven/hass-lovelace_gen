@@ -65,3 +65,28 @@ loader.yaml.SafeLoader.add_constructor("!file", _uncache_file)
 async def async_setup(hass, config):
     llgen_config.update(config.get("lovelace_gen"));
     return True
+
+# Allow redefinition of node anchors
+import yaml
+
+def compose_node(self, parent, index):
+    if self.check_event(yaml.events.AliasEvent):
+        event = self.get_event()
+        anchor = event.anchor
+        if anchor not in self.anchors:
+            raise yaml.composer.ComposerError(None, None, "found undefined alias %r"
+                    % anchor, event.start_mark)
+        return self.anchors[anchor]
+    event = self.peek_event()
+    anchor = event.anchor
+    self.descend_resolver(parent, index)
+    if self.check_event(yaml.events.ScalarEvent):
+        node = self.compose_scalar_node(anchor)
+    elif self.check_event(yaml.events.SequenceStartEvent):
+        node = self.compose_sequence_node(anchor)
+    elif self.check_event(yaml.events.MappingStartEvent):
+        node = self.compose_mapping_node(anchor)
+    self.ascend_resolver()
+    return node
+
+yaml.composer.Composer.compose_node = compose_node
