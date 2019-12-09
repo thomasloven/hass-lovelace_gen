@@ -37,6 +37,7 @@ Any yaml file that is to be processed with `lovelace_gen` *MUST* have the follow
 ```yaml
 # lovelace_gen
 ```
+**Important:** For some reason, which I can't seem to nail down, things stop working if you add `# lovelace_gen` to `ui-lovelace.yaml`. Adding it to *any* file *included from* `ui-lovelace.yaml` works, though.
 
 ### Let's continue
 
