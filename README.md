@@ -60,7 +60,7 @@ entities:
 
 - Loop over lists
 ```yaml
-{% set lights = ['light.bed_light', 'light.kitchen_lights', 'light.ceiling_lights' %}
+{% set lights = ['light.bed_light', 'light.kitchen_lights', 'light.ceiling_lights'] %}
 
 - type: entities
   entities:
