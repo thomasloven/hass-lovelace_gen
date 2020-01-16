@@ -12,7 +12,12 @@ from homeassistant.exceptions import HomeAssistantError
 
 _LOGGER = logging.getLogger(__name__)
 
+def fromjson(value):
+    return json.loads(value)
+
 jinja = jinja2.Environment(loader=jinja2.FileSystemLoader("/"))
+
+jinja.filters['fromjson'] = fromjson
 
 llgen_config = {}
 

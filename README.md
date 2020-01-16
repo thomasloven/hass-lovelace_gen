@@ -150,6 +150,18 @@ name: {{ name }}
 
 Be careful about the syntax here. Note that the arguments are given as a list and is indented under the `!include` statement. The second item in the list is a dictionary.
 
+> Note: If you want to pass a dictionary of values into a file, you need to convert it to json first:
+> ```yaml
+> {% set mydict = {"a": 1, "b": 2} %}
+> variable: {{ mydict | tojson }}
+> ```
+> And then convert it back from json inside the file:
+> ```yaml
+> content: The value of a is {{ (variable | fromjson)['a'] }}
+> ```
+>
+> The `fromjson` filter is a feature of `lovelace_gen` and not normally included in jinja.
+
 ## Invalidate cache of files
 
 If you use lots of custom lovelace cards, chances are that you have run into caching problems at one point or another.
