@@ -150,7 +150,7 @@ name: {{ name }}
 
 Be careful about the syntax here. Note that the arguments are given as a list and is indented under the `!include` statement. The second item in the list is a dictionary.
 
-> Note: If you want to pass a dictionary of values into a file, you need to convert it to json first:
+> **Note**: If you want to pass a dictionary of values into a file, you need to convert it to json first:
 > ```yaml
 > {% set mydict = {"a": 1, "b": 2} %}
 > variable: {{ mydict | tojson }}
@@ -160,7 +160,7 @@ Be careful about the syntax here. Note that the arguments are given as a list an
 > content: The value of a is {{ (variable | fromjson)['a'] }}
 > ```
 >
-> The `fromjson` filter is a feature of `lovelace_gen` and not normally included in jinja.
+> The `tojson` and `fromjson` filters are features of `lovelace_gen`, they are not standard Jinja filters.
 
 ## Invalidate cache of files
 
