@@ -25,7 +25,11 @@ def load_yaml(fname, secrets = None, args={}):
     try:
         ll_gen = False
         with open(fname, encoding="utf-8") as f:
-            if f.readline().lower().startswith("# lovelace_gen"):
+            line = f.readline().lower()
+            # If the first line starts with the document separator, load the second line
+            if (line().lower().startswith("---"))
+                line = f.readline().lower()
+            if line.startswith("# lovelace_gen"):
                 ll_gen = True
 
         if ll_gen:
