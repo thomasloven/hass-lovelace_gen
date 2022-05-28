@@ -1,7 +1,7 @@
 lovelace\_gen
 ============
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 
 Improve the lovelace yaml parser for Home Assistant.
 
