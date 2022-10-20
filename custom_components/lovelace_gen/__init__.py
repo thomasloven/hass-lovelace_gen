@@ -31,6 +31,8 @@ def load_yaml(fname, secrets = None, args={}):
         if ll_gen:
             stream = io.StringIO(jinja.get_template(fname).render({**args, "_global": llgen_config}))
             stream.name = fname
+            with open(stream.name + '.gen', mode='w') as f:
+                print(stream.getvalue(), file=f)
             return loader.yaml.load(stream, Loader=lambda _stream: loader.SafeLineLoader(_stream, secrets)) or OrderedDict()
         else:
             with open(fname, encoding="utf-8") as config_file:
