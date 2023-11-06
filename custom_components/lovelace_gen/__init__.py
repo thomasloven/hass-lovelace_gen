@@ -6,6 +6,7 @@ import time
 from collections import OrderedDict
 
 import jinja2
+import functools
 
 from homeassistant.util.yaml import loader
 from homeassistant.exceptions import HomeAssistantError
@@ -15,9 +16,18 @@ _LOGGER = logging.getLogger(__name__)
 def fromjson(value):
     return json.loads(value)
 
-jinja = jinja2.Environment(loader=jinja2.FileSystemLoader("/"))
+@functools.lru_cache(maxsize=None)
+def jinja(fromjson, ll_gen_brackets):
+    o = ll_gen_brackets[0]
+    c = ll_gen_brackets[-1]
+    p = "%"
 
-jinja.filters['fromjson'] = fromjson
+    value = jinja2.Environment(loader=jinja2.FileSystemLoader("/"),
+        block_start_string=o+p, block_end_string=p+c,
+        variable_start_string=o+o, variable_end_string=c+c)
+    value.filters['fromjson'] = fromjson
+#    _LOGGER.info("Created enviroment with %s", ll_gen_brackets)
+    return value
 
 llgen_config = {}
 
@@ -27,9 +37,12 @@ def load_yaml(fname, secrets = None, args={}):
         with open(fname, encoding="utf-8") as f:
             if f.readline().lower().startswith("# lovelace_gen"):
                 ll_gen = True
+                ll_gen_brackets = "{}"
+                if f.readline().lower().startswith("# lovelace_gen_config []"):
+                    ll_gen_brackets = "[]"
 
         if ll_gen:
-            stream = io.StringIO(jinja.get_template(fname).render({**args, "_global": llgen_config}))
+            stream = io.StringIO(jinja(fromjson, ll_gen_brackets).get_template(fname).render({**args, "_global": llgen_config}))
             stream.name = fname
             return loader.yaml.load(stream, Loader=lambda _stream: loader.SafeLineLoader(_stream, secrets)) or OrderedDict()
         else:
