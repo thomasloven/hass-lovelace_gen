@@ -335,7 +335,7 @@ I'd advice you not to try it.
 
 ### What if I WANT jinja in my lovelace interface
 Use the `{% raw %}` and `{% endraw %}` tags. There's an example above. Alternatively, you can change `lovelace_gen` to use different characters, as mentioned above under
-[Third of all](hass-lovelace_gen#first-of-all).
+[Third of all](#first-of-all).
 
 
 ### How do I avoid "bad indentation of a mapping entry" or "missed comma between flow collection entries" in VS Code?
