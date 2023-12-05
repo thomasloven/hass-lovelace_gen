@@ -31,10 +31,10 @@ def load_yaml(fname, secrets = None, args={}):
         if ll_gen:
             stream = io.StringIO(jinja.get_template(fname).render({**args, "_global": llgen_config}))
             stream.name = fname
-            return loader.yaml.load(stream, Loader=lambda _stream: loader.SafeLineLoader(_stream, secrets)) or OrderedDict()
+            return loader.yaml.load(stream, Loader=lambda _stream: loader.PythonSafeLoader(_stream, secrets)) or OrderedDict()
         else:
             with open(fname, encoding="utf-8") as config_file:
-                return loader.yaml.load(config_file, Loader=lambda stream: loader.SafeLineLoader(stream, secrets)) or OrderedDict()
+                return loader.yaml.load(config_file, Loader=lambda stream: loader.PythonSafeLoader(stream, secrets)) or OrderedDict()
     except loader.yaml.YAMLError as exc:
         _LOGGER.error(str(exc))
         raise HomeAssistantError(exc)
@@ -64,8 +64,8 @@ def _uncache_file(ldr, node):
     return f"{path}?{timestamp}"
 
 loader.load_yaml = load_yaml
-loader.SafeLineLoader.add_constructor("!include", _include_yaml)
-loader.SafeLineLoader.add_constructor("!file", _uncache_file)
+loader.PythonSafeLoader.add_constructor("!include", _include_yaml)
+loader.PythonSafeLoader.add_constructor("!file", _uncache_file)
 
 async def async_setup(hass, config):
     llgen_config.update(config.get("lovelace_gen"));
