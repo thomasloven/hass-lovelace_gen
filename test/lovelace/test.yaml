@@ -1,0 +1,37 @@
+# lovelace_gen
+
+
+title: test
+cards:
+{% set my_lamp = "light.bed_light" %}
+  - type: entities
+    entities:
+    - {{ my_lamp }}
+
+{% set lights = ['light.bed_light', 'light.kitchen_lights', 'light.ceiling_lights'] %}
+  - type: entities
+    entities:
+    {% for l in lights %}
+      - {{ l }}
+    {% endfor %}
+
+  - type: glance
+    entities:
+    {% for l in lights %}
+      - {{ l }}
+    {% endfor %}
+
+{% macro button(entity) -%}
+      - type: entity-button
+        entity: {{ entity }}
+        tap_action:
+          action: more-info
+        hold_action:
+          action: toggle
+{%- endmacro %}
+
+  - type: horizontal-stack
+    cards:
+      {{ button("light.bed_light") }}
+      {{ button("light.ceiling_lights") }}
+      {{ button("light.kitchen_lights") }}

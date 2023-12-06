@@ -1,0 +1,14 @@
+default_config:
+
+demo:
+
+lovelace_gen:
+
+lovelace:
+  mode: storage
+  dashboards:
+    locelace-yaml:
+      mode: yaml
+      title: yaml
+      show_in_sidebar: true
+      filename: test/lovelace/lovelace.yaml
