@@ -25,7 +25,7 @@ def load_yaml(fname, secrets = None, args={}):
     try:
         ll_gen = False
         with open(fname, encoding="utf-8") as f:
-            if f.readline().lower().startswith("# lovelace_gen"):
+            if f.readline().lower().startswith("# lovelace_gen") or f.readline().lower().startswith("# lovelace_gen"):
                 ll_gen = True
 
         if ll_gen:
