@@ -3,51 +3,70 @@ lovelace\_gen
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 
-Improve the lovelace yaml parser for Home Assistant.
+Improve the Home Assistant Dashboard YAML parser by adding Python functionality for more robust **generation** of Jinja2 templates. This integration changes the way Home Assistant parses your `ui-lovelace.yaml` and/or other configured Dashboard .yaml files before sending the information off to the Dashboard frontend in your browser. It's only useful on those Dashboards configured to use [YAML mode](https://www.home-assistant.io/lovelace/yaml-mode/).
 
 See [my floorplan card](https://github.com/thomasloven/hass-config/blob/master/lovelace/floorplan.yaml) for an example of what's possible.
 
-# Installation instructions
+# Installation
 
-- Copy the contents of `custom_components/lovelace_gen/` to `<your config dir>/custom_components/lovelace_gen/`.
-- Add the following to your `configuration.yaml`:
+- Copy the contents of `custom_components/lovelace_gen/` to `/config/custom_components/lovelace_gen/`.
+- Add the following:
+  - to `configuration.yaml` if you intend to implement lovelace_gen functionality with your main default (i.e. Overview) Dashboard.
+    ```yaml
+    lovelace_gen:
 
-```yaml
-lovelace_gen:
-
-lovelace:
-  mode: yaml
-```
-
+    lovelace:
+      mode: yaml
+    ```
+  - and/or [all of your dashboards](https://www.home-assistant.io/dashboards/dashboards/) that you have set to yaml mode and would like to implement lovelace_gen functionality:
+    ```yaml
+    dashboards:
+      yaml-home:
+        mode: yaml
+        filename: DashboardHome.yaml
+        title: Home
+        icon: mdi:home-account
+        show_in_sidebar: true
+        require_admin: false
+      yaml-sandbox:
+        mode: yaml
+        filename: YAMLSandbox.yaml
+        title: YAML Sandbox
+        icon: mdi:timer-sand-paused
+        show_in_sidebar: true
+        require_admin: true
+    ```
 - Restart Home Assistant
 
-# Usage
+# Configuration
 
-This integration changes the way Home Assistant parses your `ui_lovelace.yaml` before sending the information off to the lovelace frontend in your browser. It's obviously only useful if you are using [YAML mode](https://www.home-assistant.io/lovelace/yaml-mode/).
+Keep the following in mind as you configure your Dashboards to implement lovelace_gen functionality:
 
-### First of all
-To rerender the frontend, use the Refresh option from the three-dots-menu in Lovelace
+- Any .yaml Dashboard file that is to be processed with `lovelace_gen` *MUST* have the following as the first line of an included .yaml file:
+  - ui-lovelace.yaml or DashboardHome.yaml, etc.
+    ```yaml
+    title: Home
+    views: !include ui-lovelace-included.yaml
+    ```
+  - ui-lovelace-included.yaml or DashboardHome_Included.yaml, etc.
+    ```yaml
+    # lovelace_gen
+    ```
+    **I do not know why this is necessary, but it's how you must configure your Dashboard for lovelace_gen to work.**
+
+- To rerender the frontend, use the Refresh option from the three-dots-menu in Lovelace
 
 ![refresh](https://user-images.githubusercontent.com/1299821/62565489-2e655780-b887-11e9-86a1-2de868a4dc7d.png)
 
-### Second of all
+# Added Functionality!
 
-Any yaml file that is to be processed with `lovelace_gen` *MUST* have the following as its first line:
-
-```yaml
-# lovelace_gen
-```
-**Important:** For some reason, which I can't seem to nail down, things stop working if you add `# lovelace_gen` to `ui-lovelace.yaml`. Adding it to *any* file *included from* `ui-lovelace.yaml` works, though.
-
-### Let's continue
-
-The changes from the default generation include
+The changes from the default Dashboard generation include
 
 ## Jinja2 templates
 
-You can now use [Jinja2](https://jinja.palletsprojects.com/en/2.10.x/templates/) templates in your lovelace configuration.
+You can now use [Jinja2 templates](https://jinja.palletsprojects.com/en/3.0.x/templates/) in your Dashboard configuration similar to how templates can already be used in other sections of Home Assistant.
 
-This can be used e.g. to
+Some examples of how this can be used include the following:
 
 - Set and use variables
 ```yaml
@@ -58,7 +77,7 @@ entities:
  - {{ my_lamp }}
 ```
 
-- Loop over lists
+- Loop through lists
 ```yaml
 {% set lights = ['light.bed_light', 'light.kitchen_lights', 'light.ceiling_lights'] %}
 
@@ -94,7 +113,7 @@ cards:
   {{ button("light.kitchen_lights") }}
 
 ```
-Please note that for this to work, the indentation of the code in the macro block *must* be equal to what it should be where it's called.
+Please note that for this to work, the indentation of the code in the macro block *must* exactly where it will be called.
 
 - Add conditional parts
 ```yaml
@@ -109,14 +128,14 @@ This might make conditions seem pointless... but they work well with the next fe
 
 ## Passing arguments to included files
 
-Normally, you can include a file in your lovelace configuration using
+Normally, you can include a file in your Lovelace configuration using
 
 ```yaml
 view:
   - !include lovelace/my_view.yaml
 ```
 
-`lovelace_gen` lets you add a second argument to that function. This second argument is a dictionary of variables and their values, that will be set for all jinja2 templates in the new file:
+`lovelace_gen` lets you add a second argument to that function. This second argument is a dictionary of variables and their values, that will be set for all Jinja2 templates in the new file:
 
 ```yaml
 type: horizontal-stack
@@ -160,11 +179,11 @@ Be careful about the syntax here. Note that the arguments are given as a list an
 > content: The value of a is {{ (variable | fromjson)['a'] }}
 > ```
 >
-> The `fromjson` filter is a feature of `lovelace_gen` and not normally included in jinja.
+> The `fromjson` filter is a feature of `lovelace_gen` and not normally included in Jinja2.
 
 ## Invalidate cache of files
 
-If you use lots of custom lovelace cards, chances are that you have run into caching problems at one point or another.
+If you use lots of custom Lovelace cards, chances are that you have run into caching problems at one point or another.
 
 I.e. you refresh your page after updating the custom card, but nothing changes.
 
@@ -188,8 +207,8 @@ After this, `lovelace_gen` will automatically add a random version number to you
 
 This can also be used for pictures.
 
-## Example
-`ui_lovelace.yaml`
+## Example Dashboard Configurations
+`ui-lovelace.yaml`
 ```yaml
 # lovelace_gen
 resources:
@@ -222,13 +241,13 @@ cards:
     - lamps: true
       title: With Lamps
 
-# Use this if you want lovelace_gen to ignore the jinja
+# Use this if you want lovelace_gen to ignore the Jinja2
 {% raw %}
   - type: markdown
     content: |
       # Coming soon(?)
 
-      A built-inmarkdown card with jinja templating.
+      A built-inmarkdown card with Jinja2 templating.
       So I can tell that my light is {{ states('light.bed_light') }}!
 {% endraw %}
 
@@ -268,10 +287,10 @@ With lovelace_gen installed, you'll be able to redefine node anchors in the same
 
 # FAQ
 
-### How can I do global variables?
-You can add variables to the `lovelace_gen` configuration in `configuration.yaml` and then refernce them in lovelace using `{{ _global }}`.
+### How can I use global variables?
+You can add variables to the `lovelace_gen` configuration in `configuration.yaml` and then reference them in lovelace using `{{ _global }}`.
 
-E.g.:
+For example:
 ```yaml
 lovelace_gen:
   rooms:
@@ -304,9 +323,8 @@ lovelace_gen itself.
 
 I'd advice you not to try it.
 
-
-### What if I WANT jinja in my lovelace interface
-Use the `{% raw %}` and `{% endraw %}` tags. There's an example above.
+### What if I WANT Jinja2 in my Lovelace interface
+Use the `{% raw %}` and `{% endraw %}` tags. See [this example](#example-dashboard-configurations).
 
 ### Is there any way to solve the indentation problem for macros
 Not automatically, but you can do something like
