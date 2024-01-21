@@ -68,7 +68,9 @@ loader.PythonSafeLoader.add_constructor("!include", _include_yaml)
 loader.PythonSafeLoader.add_constructor("!file", _uncache_file)
 
 async def async_setup(hass, config):
-    llgen_config.update(config.get("lovelace_gen"));
+    conf = config.get("lovelace_gen")
+    llgen_config.update(conf)
+    hass.states.async_set("lovelace_gen.data", "loaded", conf, force_update=True)
     return True
 
 # Allow redefinition of node anchors
