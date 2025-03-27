@@ -7,6 +7,8 @@ Improve the lovelace yaml parser for Home Assistant.
 
 See [my floorplan card](https://github.com/thomasloven/hass-config/blob/master/lovelace/floorplan.yaml) for an example of what's possible.
 
+This fork includes a configuration option to change the `{}` delimiters used by Jinja to disambiguate them from those of Home Assistant templates.
+
 # Installation instructions
 
 - Copy the contents of `custom_components/lovelace_gen/` to `<your config dir>/custom_components/lovelace_gen/`.
@@ -38,6 +40,32 @@ Any yaml file that is to be processed with `lovelace_gen` *MUST* have the follow
 # lovelace_gen
 ```
 **Important:** For some reason, which I can't seem to nail down, things stop working if you add `# lovelace_gen` to `ui-lovelace.yaml`. Adding it to *any* file *included from* `ui-lovelace.yaml` works, though.
+
+### Third of all
+
+Assuming you already have included the first line above, you may optionally include the following as the second line:
+
+```yaml
+# lovelace_gen_config []
+```
+This will then replace the usual Jinja delimiters of `{` and `}` with `[` and `]`. This means instead of coding `{{ ... }}`, you would code `[[ ...]]`, and instead of
+`{% ... %}` you would use `[% ... %]`. This makes it easier to intersperse `lovelace_gen` code with Home Assistant Template code. For example:
+
+```yaml
+{% raw% }{{ states('{% endraw %}{{ entity }}{% raw %}') }}{% endraw %}
+```
+
+Becomes:
+
+```yaml
+{{ states('[[ entity ]]') }}
+```
+
+This takes effect from "here down". If you want a later file to revert to the default behavior, include the following as the second line:
+
+```yaml
+# lovelace_gen_config {}
+```
 
 ### Let's continue
 
@@ -306,9 +334,15 @@ I'd advice you not to try it.
 
 
 ### What if I WANT jinja in my lovelace interface
-Use the `{% raw %}` and `{% endraw %}` tags. There's an example above.
+Use the `{% raw %}` and `{% endraw %}` tags. There's an example above. Alternatively, you can change `lovelace_gen` to use different characters, as mentioned above under
+[Third of all](#third-of-all).
 
-### Is there any way to solve the indentation problem for macros
+
+### How do I avoid "bad indentation of a mapping entry" or "missed comma between flow collection entries" in VS Code?
+If a line only contains `lovelace-gen` code, you can start that line as a comment, and the code will still run. The resultant output from the generation will contain these
+comments, but if they end up on a line of their own, they should do no harm.
+
+### Is there any way to solve the indentation problem for macros?
 Not automatically, but you can do something like
 ```yaml
 {% macro button(entity, ws) %}
