@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 import jinja2
 
-from homeassistant.util.yaml import loader
+from annotatedyaml import loader
 from homeassistant.exceptions import HomeAssistantError
 
 _LOGGER = logging.getLogger(__name__)
